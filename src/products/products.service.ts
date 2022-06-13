@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   MethodNotAllowedException,
   NotFoundException,
@@ -13,6 +14,12 @@ export class ProductsService {
   private products: Product[] = [];
 
   create(createProductDto: CreateProductDto): void {
+    if (
+      this.products.findIndex((value) => value.name === createProductDto.name) > -1
+    ) {
+      throw new BadRequestException('product with same name already exists.');
+    }
+
     const product = new Product();
     product.id = this.sequence++;
     product.name = createProductDto.name;
@@ -43,6 +50,12 @@ export class ProductsService {
       throw new MethodNotAllowedException();
     }
 
+    if (
+      this.products.findIndex((value) => value.name === updateProductDto.name) > -1
+    ) {
+      throw new BadRequestException('product with same name already exists.');
+    }
+
     product.name = updateProductDto.name ?? product.name;
     product.price = updateProductDto.price ?? product.price;
     product.description = updateProductDto.description ?? product.description;
@@ -52,7 +65,6 @@ export class ProductsService {
 
   remove(id: number): void {
     const product = this.findOne(id);
-    this.products.indexOf(product) > -1 &&
-      this.products.splice(this.products.indexOf(product), 1);
+    this.products.indexOf(product) > -1 && this.products.splice(this.products.indexOf(product), 1);
   }
 }

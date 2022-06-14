@@ -21,6 +21,5 @@ export class CreateProductDto {
   price: number;
 
   @IsOptional()
-  @Length(10, 50)
   description: string;
 }

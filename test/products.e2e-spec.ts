@@ -56,7 +56,7 @@ describe('ProductsController (e2e)', () => {
               price: 1000,
               description: 'valid description2',
             })
-            .expect(400);
+            .expect(409);
         });
     });
 
@@ -71,26 +71,6 @@ describe('ProductsController (e2e)', () => {
         .expect(400);
     });
 
-    it('등록 요청한 제품 이름 좌우 빈칸을 제거한다.', () => {
-      return request(app.getHttpServer())
-        .post('/products')
-        .send({
-          name: '   valid name  ',
-          price: 10000,
-          description: 'valid description',
-        })
-        .then(() => {
-          return request(app.getHttpServer())
-            .get('/products/1')
-            .expect(200, {
-              id: 1,
-              name: 'valid name',
-              price: 10000,
-              description: 'valid description',
-            });
-        });
-    });
-
     it('등록 요청한 제품 이름 길이가 빈칸 없이 2 미만이면 HTTP Status 400 응답한다.', () => {
       return request(app.getHttpServer())
         .post('/products')
@@ -102,18 +82,7 @@ describe('ProductsController (e2e)', () => {
         .expect(400);
     });
 
-    it('등록 요청한 제품 이름 길이가 빈칸 포함 2 미만이면 HTTP Status 400 응답한다.', () => {
-      return request(app.getHttpServer())
-        .post('/products')
-        .send({
-          name: '  a   ',
-          price: 10000,
-          description: 'valid description',
-        })
-        .expect(400);
-    });
-
-    it('등록 요청한 제품 이름 길이가 빈칸 제외 20 초과면 HTTP Status 400 응답한다.', () => {
+    it('등록 요청한 제품 이름 길이가 20 초과면 HTTP Status 400 응답한다.', () => {
       return request(app.getHttpServer())
         .post('/products')
         .send({
@@ -122,17 +91,6 @@ describe('ProductsController (e2e)', () => {
           description: 'valid description',
         })
         .expect(400);
-    });
-
-    it('등록 요청한 제품 이름 길이가 빈칸 제외 20 이하면 등록할 수 있다.', () => {
-      return request(app.getHttpServer())
-        .post('/products')
-        .send({
-          name: '  ' + 'a'.repeat(20) + '   ',
-          price: 10000,
-          description: 'valid description',
-        })
-        .expect(201);
     });
 
     it('등록 요청한 제품 가격이 없을 경우 HTTP Status 400 응답한다.', () => {
@@ -262,7 +220,7 @@ describe('ProductsController (e2e)', () => {
         .send({
           name: 'valid name',
         })
-        .expect(400);
+        .expect(409);
     });
 
     it('업데이트 요청한 제품 이름이 문자열이 아닐 경우 HTTP Status 400 응답한다.', () => {
@@ -274,25 +232,7 @@ describe('ProductsController (e2e)', () => {
         .expect(400);
     });
 
-    it('업데이트 요청한 제품 이름 좌우 빈칸을 제거한다.', () => {
-      return request(app.getHttpServer())
-        .patch('/products/1')
-        .send({
-          name: '   valid name2  ',
-        })
-        .then(() => {
-          return request(app.getHttpServer())
-            .get('/products/1')
-            .expect(200, {
-              id: 1,
-              name: 'valid name2',
-              price: 10000,
-              description: 'valid description',
-            });
-        });
-    });
-
-    it('업데이트 요청한 제품 이름 길이가 빈칸 없이 2 미만이면 HTTP Status 400 응답한다.', () => {
+    it('업데이트 요청한 제품 이름 길이가 2 미만이면 HTTP Status 400 응답한다.', () => {
       return request(app.getHttpServer())
         .patch('/products/1')
         .send({
@@ -301,31 +241,13 @@ describe('ProductsController (e2e)', () => {
         .expect(400);
     });
 
-    it('업데이트 요청한 제품 이름 길이가 빈칸 포함 2 미만이면 HTTP Status 400 응답한다.', () => {
-      return request(app.getHttpServer())
-        .patch('/products/1')
-        .send({
-          name: '  a   ',
-        })
-        .expect(400);
-    });
-
-    it('업데이트 요청한 제품 이름 길이가 빈칸 제외 20 초과면 HTTP Status 400 응답한다.', () => {
+    it('업데이트 요청한 제품 이름 길이가 20 초과면 HTTP Status 400 응답한다.', () => {
       return request(app.getHttpServer())
         .patch('/products/1')
         .send({
           name: 'a'.repeat(21),
         })
         .expect(400);
-    });
-
-    it('업데이트 요청한 제품 이름 길이가 빈칸 제외 20 이하면 등록할 수 있다.', () => {
-      return request(app.getHttpServer())
-        .patch('/products/1')
-        .send({
-          name: '  ' + 'a'.repeat(20) + '   ',
-        })
-        .expect(200);
     });
 
     it('이미 업데이트 한 제품에 대해 또 업데이트 요청할 경우 HTTP Status 400 응답한다. (2번 이상 업데이트 불가능)', () => {

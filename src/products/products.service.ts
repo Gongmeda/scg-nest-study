@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   MethodNotAllowedException,
   NotFoundException,
@@ -17,7 +17,7 @@ export class ProductsService {
     if (
       this.products.findIndex((value) => value.name === createProductDto.name) > -1
     ) {
-      throw new BadRequestException('product with same name already exists.');
+      throw new ConflictException();
     }
 
     const product = new Product();
@@ -53,7 +53,7 @@ export class ProductsService {
     if (
       this.products.findIndex((value) => value.name === updateProductDto.name) > -1
     ) {
-      throw new BadRequestException('product with same name already exists.');
+      throw new ConflictException();
     }
 
     product.name = updateProductDto.name ?? product.name;

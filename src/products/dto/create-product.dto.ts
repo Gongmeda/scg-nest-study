@@ -6,12 +6,10 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
-  @Transform(({ value }) => (typeof value == 'string' ? value.trim() : value))
   @Length(2, 20)
   name: string;
 

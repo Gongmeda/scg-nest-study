@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import {
-  BadRequestException,
+  BadRequestException, ConflictException,
   MethodNotAllowedException,
   NotFoundException,
 } from '@nestjs/common';
@@ -75,12 +75,12 @@ describe('ProductsService', () => {
       expect(Math.abs(products[1].id - products[0].id)).toBe(1);
     });
 
-    it('이미 존재하는 이름의 제품을 추가하려고 하면 BadRequestException을 던진다.', () => {
+    it('이미 존재하는 이름의 제품을 추가하려고 하면 ConflictException을 던진다.', () => {
       const createProductDto = new CreateProductDto();
       createProductDto.name = 'name';
       service.create(createProductDto);
 
-      expect(() => service.create(createProductDto)).toThrow(BadRequestException);
+      expect(() => service.create(createProductDto)).toThrow(ConflictException);
     });
   });
 
@@ -132,7 +132,7 @@ describe('ProductsService', () => {
       expect(() => service.update(-1, null)).toThrow(NotFoundException);
     });
 
-    it('이미 존재하는 이름으로 업데이트하려고 하면 BadRequestException을 던진다.', () => {
+    it('이미 존재하는 이름으로 업데이트하려고 하면 ConflictException을 던진다.', () => {
       const createProductDto1 = new CreateProductDto();
       createProductDto1.name = 'name1';
       createProductDto1.price = 100;
@@ -150,7 +150,7 @@ describe('ProductsService', () => {
 
       const updateProductDto = new UpdateProductDto();
       updateProductDto.name = name;
-      expect(() => service.update(id, updateProductDto)).toThrow(BadRequestException);
+      expect(() => service.update(id, updateProductDto)).toThrow(ConflictException);
     });
 
     it('한번 성공적으로 업데이트를 했다면, 두번째 업데이트부터는 MethodNotAllowedException을 던진다.', () => {

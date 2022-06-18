@@ -1,21 +1,43 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClassSerializerInterceptor, INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { ProductsModule } from '../src/products/products.module';
 import { Reflector } from '@nestjs/core';
+import { ProductsModule } from '../src/products/products.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 describe('ProductsController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [ProductsModule],
+      imports: [
+        ProductsModule,
+        TypeOrmModule.forRoot({
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          username: 'root',
+          password: '1234',
+          database: 'nest',
+          autoLoadEntities: true,
+          synchronize: true,
+          dropSchema: true,
+          logging: true,
+        }),
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+    app.useGlobalInterceptors(
+      new ClassSerializerInterceptor(app.get(Reflector)),
+    );
     await app.init();
+  });
+
+  afterAll(async () => {
+    await app.get<DataSource>(DataSource).dropDatabase();
   });
 
   describe('/products (POST)', () => {

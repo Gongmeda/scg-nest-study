@@ -7,64 +7,76 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
-  private sequence = 1;
-  private products: Product[] = [];
+  constructor(
+    @InjectRepository(Product) private productsRepository: Repository<Product>,
+  ) {}
 
-  create(createProductDto: CreateProductDto): void {
-    if (
-      this.products.findIndex((value) => value.name === createProductDto.name) > -1
-    ) {
+  async create(createProductDto: CreateProductDto) {
+    const foundProduct = await this.productsRepository.findOneBy({
+      name: createProductDto.name,
+    });
+
+    if (foundProduct) {
       throw new ConflictException();
     }
 
     const product = new Product();
-    product.id = this.sequence++;
     product.name = createProductDto.name;
     product.price = createProductDto.price;
     product.description = createProductDto.description;
     product.isUpdated = false;
-    this.products.push(product);
+    await this.productsRepository.save(product);
   }
 
-  findAll(): Product[] {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    return await this.productsRepository.find();
   }
 
-  findOne(id: number): Product {
-    const product = this.products.find((product) => product.id === id);
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productsRepository.findOneBy({ id: id });
 
-    if (product === undefined) {
+    if (!product) {
       throw new NotFoundException();
     }
 
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto): Product {
-    const product = this.findOne(id);
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
+    const product = await this.findOne(id);
 
     if (product.isUpdated) {
       throw new MethodNotAllowedException();
     }
 
-    if (
-      this.products.findIndex((value) => value.name === updateProductDto.name) > -1
-    ) {
-      throw new ConflictException();
+    if (updateProductDto.name) {
+      const foundProduct = await this.productsRepository.findOneBy({
+        name: updateProductDto.name,
+      });
+
+      if (foundProduct) {
+        throw new ConflictException();
+      }
     }
 
     product.name = updateProductDto.name ?? product.name;
     product.price = updateProductDto.price ?? product.price;
     product.description = updateProductDto.description ?? product.description;
     product.isUpdated = true;
-    return product;
+    await this.productsRepository.save(product);
+    return await this.findOne(id);
   }
 
-  remove(id: number): void {
-    const product = this.findOne(id);
-    this.products.indexOf(product) > -1 && this.products.splice(this.products.indexOf(product), 1);
+  async remove(id: number) {
+    const product = await this.findOne(id);
+    await this.productsRepository.remove(product);
   }
 }
